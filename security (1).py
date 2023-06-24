@@ -22,7 +22,7 @@ cp4 = "виноград"
 cp5 = "морковь"
 cp6 = "кукуруза"
 # ================
-completecaptcga = [6084496194]
+completecaptcga = [ID YOUR BOT OR YOURS]
 # вместо 999 вставьте ID, у которого никогда не будет требовать капчу!
 
 
@@ -260,7 +260,7 @@ def reset(call):
 #def handle_sticker(msg):
     #bot.delete_message(msg.chat.id, msg.message_id)
     #bot.send_message(msg.chat.id, "⚠️️все стикеры блокируются кодом")
-
+    #По желанию если хотите.
 
 @bot.message_handler(commands=['msgfrombot'])
 def msg_from_bot(message):
@@ -421,9 +421,9 @@ def version(message):
 def start(message):
     bot.reply_to(message, "Привет! Я бот для управления чатом. Напиши /help, чтобы начать использование и узнать, что я умею.")
     keyboard = types.InlineKeyboardMarkup()
-    url_button = types.InlineKeyboardButton(text="Моя статья о ботах", url="https://telegra.ph/UGD-LAB-05-17")
+    url_button = types.InlineKeyboardButton(text="Your Text", url="Your link")
     keyboard.add(url_button)
-    bot.send_message(message.chat.id, "Прочитать мою статью", reply_markup=keyboard)
+    bot.send_message(message.chat.id, "Your text", reply_markup=keyboard)
 
 
 @bot.message_handler(commands=['YaGPT'])
@@ -437,10 +437,10 @@ def YaGPT(message):
 @bot.message_handler(commands=['yandex'])
 def yandex(message):
     keyboard = types.InlineKeyboardMarkup()
-    url_button = types.InlineKeyboardButton(text="Yandex", url="https://yandex.ru/")
+    url_button = types.InlineKeyboardButton(text="Your text", url="Your link")
     keyboard.add(url_button)
-    bot.send_photo(message.chat.id, "https://cdn-st2.rtr-vesti.ru/vh/pictures/hd/160/365/7.jpg")
-    bot.send_message(message.chat.id, "Иши сколько угодно:_)", reply_markup=keyboard)
+    bot.send_photo(message.chat.id, "Your image")
+    bot.send_message(message.chat.id, "Your link", reply_markup=keyboard)
 
 
 @bot.message_handler(commands=['off'])
@@ -602,9 +602,9 @@ def is_user_admin(chat_id, user_id):
 def help(message):
     bot.reply_to(message, "\n1-я команда /kick-удаляет пользователя из группы.\n2-я команда /ban-блокирует и удаляет пользователя из группы.\n3-я команда /unban-обратная функция функции /ban.\n4-я команда Запрещает писать на определенное время(сколько назаначил администратор).\n5-я команда /unmute-обратная команда команде /mute.\n6-я функция показывает погоду в вашем городе по названию либо можно написать команду /weather .\n7-я функция - приветствие новых участников .\n8-я функция - фильтр против мата и плохих слов .\n9-я функция - запрещает отправлять стикеры в телеграмм.\n10-я команда /help-показывает список всех команд.\n11-я команда /start-ну тут я не вижу смысла объяснять.\n12-я команда для перехода в нейросеть Яндекса /YaGPT.\n13-я команда /yandex перейти в поисковик Яндекса.\n14-я команда /rules показывает правила чата(не изменяется).\n15-я команда /version показывает версию бота.\n16-команда 'рп команды' показывает список доступных РП команд.\n17-я команда /stats показывает статистику чата.\n18-я функция капчи.\n А на этом пока все.Будут новые функции. ")
     keyboard = types.InlineKeyboardMarkup()
-    url_button = types.InlineKeyboardButton(text="Жми сюда", url="https://qlse5.pythonanywhere.com/")
+    url_button = types.InlineKeyboardButton(text="Your text", url="Your link")
     keyboard.add(url_button)
-    bot.send_message(message.chat.id, "Посетить мой бета сайт", reply_markup=keyboard)
+    bot.send_message(message.chat.id, "Your text", reply_markup=keyboard)
 
 @bot.message_handler(commands=['kick'])
 def kick_user(message):
@@ -630,7 +630,7 @@ def mute_user(message):
         if user_status == 'administrator' or user_status == 'creator':
             bot.reply_to(message, "Невозможно замутить администратора.")
         else:
-            duration = 60 # Значение по умолчанию - 1 минута
+            duration = 60
             args = message.text.split()[1:]
             if args:
                 try:
@@ -660,10 +660,6 @@ def unmute_user(message):
     else:
         bot.reply_to(message, "Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите размутить.")
 
-
-@bot.message_handler(commands=['weather'])
-def get_weather(message):
-    bot.send_message(message.chat.id, 'Введите название города:')
 
 @bot.message_handler(content_types=['text'])
 def weather1i(message):
