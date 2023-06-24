@@ -260,7 +260,7 @@ def reset(call):
 #def handle_sticker(msg):
     #bot.delete_message(msg.chat.id, msg.message_id)
     #bot.send_message(msg.chat.id, "⚠️️все стикеры блокируются кодом")
-    #По желанию если хотите.
+    #По умолчанию сетод закоментирован но вы можете его включить в любой момент
 
 @bot.message_handler(commands=['msgfrombot'])
 def msg_from_bot(message):
@@ -414,7 +414,7 @@ def send_stats(message):
 
 @bot.message_handler(commands=['version'])
 def version(message):
-   bot.reply_to(message, "python version: 3.10 version bot: временно недоступна")
+   bot.reply_to(message, 'python version: 3.10 Version bot:2.1 changes:[#b1e6974](https://github.com/qlswe/UGD_Yellow2.0/commit/eeaffaffdc6704f5cccc0b3c854433d490164030)', parse_mode='Markdown')
 
 
 @bot.message_handler(commands=['start'])
