@@ -23,7 +23,7 @@ cp5 = "морковь"
 cp6 = "кукуруза"
 # ================
 completecaptcga = [ID YOUR BOT OR YOURS]
-# вместо 999 вставьте ID, у которого никогда не будет требовать капчу!
+# вместо ID YOUR BOT OR YOURS вставьте ID, у которого никогда не будет требовать капчу!
 
 
 @bot.message_handler(content_types=["new_chat_members"])
@@ -396,8 +396,7 @@ def sosir(message):
     tag2 = f"[{message.reply_to_message.from_user.first_name}](tg://user?id={message.reply_to_message.from_user.id})"
     tag1 = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
     bot.reply_to(message, f'🤏🏻|{tag1} ущипнул(-а){tag2}',  parse_mode='markdown')
-
-
+    
 
 @bot.message_handler(func=lambda message: message.text.lower() == "рп команды")
 def rpcom(message):
@@ -434,7 +433,7 @@ def YaGPT(message):
     bot.send_message(message.chat.id, "Опробовать YaGPT", reply_markup=keyboard)
 
 
-@bot.message_handler(commands=['yandex'])
+@bot.message_handler(commands=['Your_command'])
 def yandex(message):
     keyboard = types.InlineKeyboardMarkup()
     url_button = types.InlineKeyboardButton(text="Your text", url="Your link")
