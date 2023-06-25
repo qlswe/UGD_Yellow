@@ -425,12 +425,12 @@ def start(message):
     bot.send_message(message.chat.id, "Your text", reply_markup=keyboard)
 
 
-@bot.message_handler(commands=['YaGPT'])
+@bot.message_handler(commands=['Your_command'])
 def YaGPT(message):
     keyboard = types.InlineKeyboardMarkup()
-    url_button = types.InlineKeyboardButton(text="YaGPT", url="https://yandex.ru/project/alice/yagpt/index?utm_source=yadirect&utm_campaign=pp_ru_desktop_yandex_search_gpt&utm_term=виртуальный%20помощник%20алиса&utm_content=gpt&etext=2202.vdhTKFpiV1ar993rbEONJcRWe8hv_tVS8r6Qa-jkH6i_jpswvMlnTBFYKd7XTjTM4ACNAJflb4bsP09zgqf2XHdvbGhnampzbnBqZmxneWw.75bcd41cc5b0a53e8ca334cf67c40f7d886fc16a&yclid=2702180996062714309")
+    url_button = types.InlineKeyboardButton(text="Your text", url="Your link")
     keyboard.add(url_button)
-    bot.send_message(message.chat.id, "Опробовать YaGPT", reply_markup=keyboard)
+    bot.send_message(message.chat.id, "Your text", reply_markup=keyboard)
 
 
 @bot.message_handler(commands=['Your_command'])
@@ -440,6 +440,49 @@ def yandex(message):
     keyboard.add(url_button)
     bot.send_photo(message.chat.id, "Your image")
     bot.send_message(message.chat.id, "Your link", reply_markup=keyboard)
+
+
+# Функция для получения информации о загрузке CPU и RAM
+def system_status():
+    cpu_percent = psutil.cpu_percent(interval=1)
+    memory = psutil.virtual_memory()
+    total_memory = round(memory.total / (1024.0 ** 3), 2)
+    available_memory = round(memory.available / (1024.0 ** 3), 2)
+    used_memory = round(memory.used / (1024.0 ** 3), 2)
+    memory_percent = memory.percent
+
+    return f"CPU: {cpu_percent}%\n" \
+           f"RAM: {used_memory} GB / {total_memory} GB ({memory_percent}%)\n" \
+           f"Available RAM: {available_memory} GB"
+
+
+# Обработка команды /status
+@bot.message_handler(commands=['status'])
+def send_status(message):
+    sys_status = system_status()
+    bot.reply_to(message, f"Текущее состояние системы:\n{sys_status}")
+
+
+# Функция для получения списка пользователей в системе Windows
+def get_users():
+    users = []
+    for user in psutil.users():
+        if user.name not in users:
+            users.append(user.name)
+    return users
+
+
+# Обработка команды /users
+@bot.message_handler(commands=['users'])
+def send_users(message):
+    users = get_users()
+    if users:
+        reply_text = "Пользователи, которые в данный момент работают в системе:\n"
+        for user in users:
+            reply_text += f"{user}\n"
+        bot.reply_to(message, reply_text)
+    else:
+        bot.reply_to(message, "В данный момент никто не работает в системе.")
 
 
 @bot.message_handler(commands=['off'])
