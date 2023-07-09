@@ -22,7 +22,7 @@ captcha_manager = CaptchaManager(bot.get_me().id)
 #def handle_sticker(msg):
     #bot.delete_message(msg.chat.id, msg.message_id)
     #bot.send_message(msg.chat.id, "⚠️️все стикеры блокируются кодом")
-
+    #метод по умолчанию выключен если вы хотите вы можете раскомментировать его
 
 @bot.message_handler(commands=['msgfrombot'])
 def msg_from_bot(message):
@@ -571,6 +571,14 @@ def weather1i(message):
 
 
 bad_words=["ссылка", "приглашение"]
+
+
+def check_message(message):
+    for word in bad_words:
+        if word in message.text.lower():
+            return True
+    return False
+
 
 @bot.message_handler(func=lambda message: True)
 def handle_message(message):
