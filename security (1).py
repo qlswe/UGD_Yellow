@@ -1,266 +1,28 @@
-import telebot
+from telebot import TeleBot
+from pyTelegramBotCAPTCHA import CaptchaManager
 import random
 import time
 from telebot import types
 import requests
 import json
-import datetime
 import logging
+import psutil
+import datetime
+import traceback
+import sys
+import os
 
+bot = TeleBot('TOKEN_BOTFATHER')
+API = 'OPENWEATHER'
+captcha_manager = CaptchaManager(bot.get_me().id)
 
-bot = telebot.TeleBot('TOKEN')
-API = 'TOKEN OPENWEATHER'
-
-
-# =====================================================
-captcha_list = ["яблоко", "арбуз", "банан", "виноград", "морковь", "кукуруза"] # это название всех элементов с капчи, можете поставить что угодно
-# ================
-cp1 = "яблоко"  # смайлики в капче.
-cp2 = "арбуз"
-cp3 = "банан"
-cp4 = "виноград"
-cp5 = "морковь"
-cp6 = "кукуруза"
-# ================
-completecaptcga = [ID YOUR BOT OR YOURS]
-# вместо ID YOUR BOT OR YOURS вставьте ID, у которого никогда не будет требовать капчу!
-
-
-@bot.message_handler(content_types=["new_chat_members"])
-def scanning(message):
-    name = message.new_chat_members[0].first_name
-    bot.send_message(message.chat.id, f"Добро пожаловать, {name}! \nВот наши правила:\n✅-можно❌-нельзя \nоскорблять людей❌\nотправлять ссылки на другие группы-✅\nматериться-❌\nотправлять 18+-❌\nспамить-❌\nдобавлять людей-✅")
-    ms = message.chat.id
-    if ms in completecaptcga:
-        bot.send_message(message.chat.id, ' Вы уже прошли проверку') # если юзер прошел проверку, тут уже вашего бота вставлять
-    else:
-        # Это внутреняя клавиатура, которая содержит в себе символы, на которые нажимает человек.
-        keyboard = types.InlineKeyboardMarkup()
-        cpt1 = types.InlineKeyboardButton(text=cp1, callback_data="cpt1")
-        cpt2 = types.InlineKeyboardButton(text=cp2, callback_data="cpt2")
-        cpt3 = types.InlineKeyboardButton(text=cp3, callback_data="cpt3")
-        keyboard.add(cpt1, cpt2, cpt3)
-        cpt1 = types.InlineKeyboardButton(text=cp4, callback_data="cpt4")
-        cpt2 = types.InlineKeyboardButton(text=cp5, callback_data="cpt5")
-        cpt3 = types.InlineKeyboardButton(text=cp6, callback_data="cpt6")
-        keyboard.add(cpt1, cpt2, cpt3)
-        markdown = """
-        *bold text*
-        _italic text_
-        [text](URL)
-        """
-        global emoji
-        emoji = random.choice(captcha_list)
-        global dostup
-        dostup = 0
-        # само сообщение с капчей.
-        bot.send_message(message.chat.id, ' Чтобы продолжить пользоваться ботом, выберите на клавиатуре ' + '*' + emoji + '*', parse_mode="Markdown", reply_markup=keyboard)
-
-
-# тут проверки, верно ли нажал человек. Изменять только текст, остальное не трогать!
-@bot.callback_query_handler(func=lambda call: True)
-def callback(call):
-    if call.message:
-        if call.data == "cpt1":
-            ms = call.message.chat.id
-            if ms in completecaptcga:
-                 bot.send_message(call.message.chat.id, 'Вы уже прошли капчу на сегодня!')
-            else:
-                check = captcha_list[0:1]
-                check = check[0]
-                if emoji == check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Проверка выполнена')
-                    completecaptcga.append(call.message.chat.id)
-                else:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Не тот символ у вас осталась одна попытка напишите /scan что бы повторить попытку.')
-        if call.data == "cpt2":
-            ms = call.message.chat.id
-            if ms in completecaptcga:
-                 bot.send_message(call.message.chat.id, 'Вы уже прошли капчу!')
-            else:
-                check = captcha_list[1:2]
-                check = check[0]
-                if emoji == check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Проверка выполнена')
-                    completecaptcga.append(call.message.chat.id)
-                if emoji != check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Не тот символ.У вас осталась одна попытка напишите /scan что бы повторить попытку')
-        if call.data == "cpt3":
-            ms = call.message.chat.id
-            if ms in completecaptcga:
-                 bot.send_message(call.message.chat.id, 'Вы уже прошли капчу!')
-            else:
-                check = captcha_list[2:3]
-                check = check[0]
-                if emoji == check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Проверка выполнена')
-                    completecaptcga.append(call.message.chat.id)
-                if emoji != check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Не тот символ.У вас осталась одна попытка напишите /scan что бы повторить попытку')
-        if call.data == "cpt4":
-            ms = call.message.chat.id
-            if ms in completecaptcga:
-                 bot.send_message(call.message.chat.id, 'Вы уже прошли капчу!')
-            else:
-                check = captcha_list[3:4]
-                check = check[0]
-                if emoji == check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=' Проверка выполнена')
-                    completecaptcga.append(call.message.chat.id)
-                if emoji != check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Не тот символ.У вас осталась одна попытка напишите /scan что бы повторить попытку')
-        if call.data == "cpt5":
-            ms = call.message.chat.id
-            if ms in completecaptcga:
-                 bot.send_message(call.message.chat.id, 'Вы уже прошли капчу!')
-            else:
-                check = captcha_list[4:5]
-                check = check[0]
-                if emoji == check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=' Проверка выполнена')
-                    completecaptcga.append(call.message.chat.id)
-                if emoji != check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Не тот символ.У вас осталась одна попытка напишите /scan что бы повторить попытку')
-        if call.data == "cpt6":
-            ms = call.message.chat.id
-            if ms in completecaptcga:
-                 bot.send_message(call.message.chat.id, 'Вы уже прошли капчу!')
-            else:
-                check = captcha_list[5:6]
-                check = check[0]
-                if emoji == check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=' Проверка выполнена')
-                    completecaptcga.append(call.message.chat.id)
-                if emoji != check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Не тот символ.У вас осталась одна попытка напишите /scan что бы повторить попытку')
-
-
-captcha_list = ["телефон", "ноутбук", "планшет", "датчик", "телевизор", "микроволновка"] # это название всех элементов с капчи, можете поставить что угодно
-# ================
-cp1 = "телефон"  # смайлики в капче.
-cp2 = "ноутбук"
-cp3 = "планшет"
-cp4 = "датчик"
-cp5 = "телевизор"
-cp6 = "микроволновка"
-
-
-completecaptcga = [6084496194]
-# вместо 999 вставьте ID, у которого никогда не будет требовать капчу!
-
-
-@bot.message_handler(commands=['scan'])
-def scanning2(message):
-    ms = message.chat.id
-    if ms in completecaptcga:
-        bot.send_message(message.chat.id, ' Вы уже прошли проверку') # если юзер прошел проверку, тут уже вашего бота вставлять
-    else:
-        # Это внутреняя клавиатура, которая содержит в себе символы, на которые нажимает человек.
-        keyboard = types.InlineKeyboardMarkup()
-        cpt1 = types.InlineKeyboardButton(text=cp1, callback_data="cpt1")
-        cpt2 = types.InlineKeyboardButton(text=cp2, callback_data="cpt2")
-        cpt3 = types.InlineKeyboardButton(text=cp3, callback_data="cpt3")
-        keyboard.add(cpt1, cpt2, cpt3)
-        cpt1 = types.InlineKeyboardButton(text=cp4, callback_data="cpt4")
-        cpt2 = types.InlineKeyboardButton(text=cp5, callback_data="cpt5")
-        cpt3 = types.InlineKeyboardButton(text=cp6, callback_data="cpt6")
-        keyboard.add(cpt1, cpt2, cpt3)
-        markdown = """
-        *bold text*
-        _italic text_
-        [text](URL)
-        """
-        global emoji
-        emoji = random.choice(captcha_list)
-        global dostup
-        dostup = 0
-        # само сообщение с капчей.
-        bot.send_message(message.chat.id, ' Чтобы продолжить пользоваться ботом, выберите на клавиатуре ' + '*' + emoji + '*', parse_mode="Markdown", reply_markup=keyboard)
-
-
-# тут проверки, верно ли нажал человек. Изменять только текст, остальное не трогать!
-@bot.callback_query_handler(func=lambda call: True)
-def reset(call):
-    if call.message:
-        if call.data == "cpt1":
-            ms = call.message.chat.id
-            if ms in completecaptcga:
-                 bot.send_message(call.message.chat.id, 'Вы уже прошли капчу на сегодня!')
-            else:
-                check = captcha_list[0:1]
-                check = check[0]
-                if emoji == check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Проверка выполнена')
-                    completecaptcga.append(call.message.chat.id)
-                else:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Не тот символ у вас осталась одна попытка напишите /scanning что бы повторить попытку.')
-        if call.data == "cpt2":
-            ms = call.message.chat.id
-            if ms in completecaptcga:
-                 bot.send_message(call.message.chat.id, 'Вы уже прошли капчу!')
-            else:
-                check = captcha_list[1:2]
-                check = check[0]
-                if emoji == check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Проверка выполнена')
-                    completecaptcga.append(call.message.chat.id)
-                if emoji != check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Не тот символ.У вас осталась одна попытка напишите /scann что бы повторить попытку')
-        if call.data == "cpt3":
-            ms = call.message.chat.id
-            if ms in completecaptcga:
-                 bot.send_message(call.message.chat.id, 'Вы уже прошли капчу!')
-            else:
-                check = captcha_list[2:3]
-                check = check[0]
-                if emoji == check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Проверка выполнена')
-                    completecaptcga.append(call.message.chat.id)
-                if emoji != check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Не тот символ.У вас осталась одна попытка напишите /scan что бы повторить попытку')
-        if call.data == "cpt4":
-            ms = call.message.chat.id
-            if ms in completecaptcga:
-                 bot.send_message(call.message.chat.id, 'Вы уже прошли капчу!')
-            else:
-                check = captcha_list[3:4]
-                check = check[0]
-                if emoji == check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=' Проверка выполнена')
-                    completecaptcga.append(call.message.chat.id)
-                if emoji != check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Не тот символ.У вас осталась одна попытка напишите /scan что бы повторить попытку')
-        if call.data == "cpt5":
-            ms = call.message.chat.id
-            if ms in completecaptcga:
-                 bot.send_message(call.message.chat.id, 'Вы уже прошли капчу!')
-            else:
-                check = captcha_list[4:5]
-                check = check[0]
-                if emoji == check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=' Проверка выполнена')
-                    completecaptcga.append(call.message.chat.id)
-                if emoji != check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Не тот символ.У вас осталась одна попытка напишите /scan что бы повторить попытку')
-        if call.data == "cpt6":
-            ms = call.message.chat.id
-            if ms in completecaptcga:
-                 bot.send_message(call.message.chat.id, 'Вы уже прошли капчу!')
-            else:
-                check = captcha_list[5:6]
-                check = check[0]
-                if emoji == check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=' Проверка выполнена')
-                    completecaptcga.append(call.message.chat.id)
-                if emoji != check:
-                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Не тот символ.У вас осталась одна попытка напишите /scan что бы повторить попытку')
 
 
 #@bot.message_handler(func=lambda message: True, content_types=['sticker'])
 #def handle_sticker(msg):
     #bot.delete_message(msg.chat.id, msg.message_id)
     #bot.send_message(msg.chat.id, "⚠️️все стикеры блокируются кодом")
-    #По умолчанию сетод закоментирован но вы можете его включить в любой момент
+
 
 @bot.message_handler(commands=['msgfrombot'])
 def msg_from_bot(message):
@@ -284,6 +46,43 @@ def nas(message):
     tag2 = f"[{message.reply_to_message.from_user.first_name}](tg://user?id={message.reply_to_message.from_user.id})"
     tag1 = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
     bot.reply_to(message, f'🔫|{tag1} тебя расстрелял(-а) {tag2}', parse_mode='markdown')
+
+
+# Message handler for new chat members
+@bot.message_handler(content_types=["new_chat_members"])
+def new_member(message):
+  for new_user in message.new_chat_members:
+    captcha_manager.restrict_chat_member(bot, message.chat.id, new_user.id)
+    captcha_manager.send_new_captcha(bot, message.chat, new_user)
+
+# Callback query handler
+@bot.callback_query_handler(func=lambda callback:True)
+def on_callback(callback):
+  captcha_manager.update_captcha(bot, callback)
+
+#Handler for correct solved CAPTCHAs
+@captcha_manager.on_captcha_correct
+def on_correct(captcha):
+  bot.send_message(captcha.chat.id, "Congrats! You solved the CAPTCHA!")
+  captcha_manager.unrestrict_chat_member(bot, captcha.chat.id, captcha.user.id)
+  captcha_manager.delete_captcha(bot, captcha)
+
+# Handler for wrong solved CAPTCHAs
+@captcha_manager.on_captcha_not_correct
+def on_not_correct(captcha):
+  if (captcha.incorrect_digits == 1 and captcha.previous_tries < 2):
+    captcha_manager.refresh_captcha(bot, captcha)
+  else:
+    bot.kick_chat_member(captcha.chat.id, captcha.user.id)
+    bot.send_message(captcha.chat.id, f"{captcha.user.first_name} failed solving the CAPTCHA and was banned!")
+    captcha_manager.delete_captcha(bot, captcha)
+
+# Handler for timed out CAPTCHAS
+@captcha_manager.on_captcha_timeout
+def on_timeout(captcha):
+  bot.kick_chat_member(captcha.chat.id, captcha.user.id)
+  bot.send_message(captcha.chat.id, f"{captcha.user.first_name} did not solve the CAPTCHA and was banned!")
+  captcha_manager.delete_captcha(bot, captcha)
 
 
 @bot.message_handler(func=lambda message: message.text.lower() == "покормить")
@@ -396,7 +195,7 @@ def sosir(message):
     tag2 = f"[{message.reply_to_message.from_user.first_name}](tg://user?id={message.reply_to_message.from_user.id})"
     tag1 = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
     bot.reply_to(message, f'🤏🏻|{tag1} ущипнул(-а){tag2}',  parse_mode='markdown')
-    
+
 
 @bot.message_handler(func=lambda message: message.text.lower() == "рп команды")
 def rpcom(message):
@@ -413,33 +212,24 @@ def send_stats(message):
 
 @bot.message_handler(commands=['version'])
 def version(message):
-   bot.reply_to(message, 'python version: 3.10 Version bot:2.1 changes:[#b1e6974](https://github.com/qlswe/UGD_Yellow2.0/commit/eeaffaffdc6704f5cccc0b3c854433d490164030)', parse_mode='Markdown')
+   bot.reply_to(message, 'python version: 3.10 Version bot:2.1 changes:[#f7d632a](https://github.com/qlswe/UGD_Yellow2.0/commit/f7d632a07bb6f637992c7ca8da92b0306a5eb7c8)', parse_mode='Markdown')
 
 
 @bot.message_handler(commands=['start'])
 def start(message):
     bot.reply_to(message, "Привет! Я бот для управления чатом. Напиши /help, чтобы начать использование и узнать, что я умею.")
     keyboard = types.InlineKeyboardMarkup()
-    url_button = types.InlineKeyboardButton(text="Your Text", url="Your link")
+    url_button = types.InlineKeyboardButton(text="Your_text", url="Your_url")
     keyboard.add(url_button)
-    bot.send_message(message.chat.id, "Your text", reply_markup=keyboard)
+    bot.send_message(message.chat.id, "Your_text", reply_markup=keyboard)
 
 
-@bot.message_handler(commands=['Your_command'])
+@bot.message_handler(commands=['commands'])
 def YaGPT(message):
     keyboard = types.InlineKeyboardMarkup()
-    url_button = types.InlineKeyboardButton(text="Your text", url="Your link")
+    url_button = types.InlineKeyboardButton(text="Your text", url="Your_url")
     keyboard.add(url_button)
-    bot.send_message(message.chat.id, "Your text", reply_markup=keyboard)
-
-
-@bot.message_handler(commands=['Your_command'])
-def yandex(message):
-    keyboard = types.InlineKeyboardMarkup()
-    url_button = types.InlineKeyboardButton(text="Your text", url="Your link")
-    keyboard.add(url_button)
-    bot.send_photo(message.chat.id, "Your image")
-    bot.send_message(message.chat.id, "Your link", reply_markup=keyboard)
+    bot.send_message(message.chat.id, "Your_text", reply_markup=keyboard)
 
 
 # Функция для получения информации о загрузке CPU и RAM
@@ -451,6 +241,8 @@ def system_status():
     used_memory = round(memory.used / (1024.0 ** 3), 2)
     memory_percent = memory.percent
 
+
+
     return f"CPU: {cpu_percent}%\n" \
            f"RAM: {used_memory} GB / {total_memory} GB ({memory_percent}%)\n" \
            f"Available RAM: {available_memory} GB"
@@ -460,8 +252,25 @@ def system_status():
 @bot.message_handler(commands=['status'])
 def send_status(message):
     sys_status = system_status()
-    bot.reply_to(message, f"Текущее состояние системы:\n{sys_status}")
+    bot.reply_to(message, f"Состояние системы в данный момент:\n{sys_status}")
 
+
+
+@bot.message_handler(commands=['admin'])
+def chat_stats(message):
+    chat_id = message.chat.id
+    chat_members = bot.get_chat_members_count(chat_id)
+    chat_title = message.chat.title
+    chat_type = message.chat.type
+    chat_admins = bot.get_chat_administrators(chat_id)
+
+    response = f"Статистика чата {chat_title} ({chat_type}):\n\n"
+    response += f"Количество участников: {chat_members}\n"
+
+    admin_list = [admin.user.username for admin in chat_admins]
+    response += f"Администраторы: @{', '.join(admin_list)}"
+
+    bot.send_message(chat_id, response)
 
 # Функция для получения списка пользователей в системе Windows
 def get_users():
@@ -485,11 +294,21 @@ def send_users(message):
         bot.reply_to(message, "В данный момент никто не работает в системе.")
 
 
+@bot.message_handler(commands=['yandex'])
+def yandex(message):
+    keyboard = types.InlineKeyboardMarkup()
+    url_button = types.InlineKeyboardButton(text="Your_text", url="Your_url")
+    keyboard.add(url_button)
+    bot.send_photo(message.chat.id, "Your_photo")
+    bot.send_message(message.chat.id, " Your_text", reply_markup=keyboard)
+
+
 @bot.message_handler(commands=['off'])
 def off(message):
     bot.reply_to(message, "Выключение...")
     bot.reply_to(message, "Если захотите снова включить сделайте это через консоль сервра.")
     bot.reply_to(message, "Готово☑️")
+    bot.restrict_chat_member(message.chat.id, message.from_user.id, until_date=time()+86400)
     exit()
 
 
@@ -598,7 +417,22 @@ def P19(message):
 def P19(message):
     bot.reply_to(message, "\nПока что на этом все.")
 
+@bot.message_handler(commands=['whoami'])
+def whoami(message):
 
+    # Получаем ID пользователя
+    user_id = message.from_user.id
+
+    # Получаем информацию о пользователе
+    user_info = bot.get_chat_member(chat_id=message.chat.id, user_id=user_id)
+
+    # Получаем имя пользователя
+    user_name = user_info.user.first_name
+    if user_info.user.last_name is not None:
+        user_name += ' '+user_info.user.last_name
+
+    # Отвечаем на запрос
+    bot.send_message(message.chat.id, f'Вы {user_name} ({user_id})')
 
 @bot.message_handler(commands=['ban'])
 def ban_user(message):
@@ -644,9 +478,9 @@ def is_user_admin(chat_id, user_id):
 def help(message):
     bot.reply_to(message, "\n1-я команда /kick-удаляет пользователя из группы.\n2-я команда /ban-блокирует и удаляет пользователя из группы.\n3-я команда /unban-обратная функция функции /ban.\n4-я команда Запрещает писать на определенное время(сколько назаначил администратор).\n5-я команда /unmute-обратная команда команде /mute.\n6-я функция показывает погоду в вашем городе по названию либо можно написать команду /weather .\n7-я функция - приветствие новых участников .\n8-я функция - фильтр против мата и плохих слов .\n9-я функция - запрещает отправлять стикеры в телеграмм.\n10-я команда /help-показывает список всех команд.\n11-я команда /start-ну тут я не вижу смысла объяснять.\n12-я команда для перехода в нейросеть Яндекса /YaGPT.\n13-я команда /yandex перейти в поисковик Яндекса.\n14-я команда /rules показывает правила чата(не изменяется).\n15-я команда /version показывает версию бота.\n16-команда 'рп команды' показывает список доступных РП команд.\n17-я команда /stats показывает статистику чата.\n18-я функция капчи.\n А на этом пока все.Будут новые функции. ")
     keyboard = types.InlineKeyboardMarkup()
-    url_button = types.InlineKeyboardButton(text="Your text", url="Your link")
+    url_button = types.InlineKeyboardButton(text="Your_text", url="Your_url")
     keyboard.add(url_button)
-    bot.send_message(message.chat.id, "Your text", reply_markup=keyboard)
+    bot.send_message(message.chat.id, "your_text", reply_markup=keyboard)
 
 @bot.message_handler(commands=['kick'])
 def kick_user(message):
@@ -672,7 +506,7 @@ def mute_user(message):
         if user_status == 'administrator' or user_status == 'creator':
             bot.reply_to(message, "Невозможно замутить администратора.")
         else:
-            duration = 60
+            duration = 60 # Значение по умолчанию - 1 минута
             args = message.text.split()[1:]
             if args:
                 try:
@@ -692,6 +526,7 @@ def mute_user(message):
         bot.reply_to(message, "Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите замутить.")
 
 
+
 @bot.message_handler(commands=['unmute'])
 def unmute_user(message):
     if message.reply_to_message:
@@ -702,6 +537,10 @@ def unmute_user(message):
     else:
         bot.reply_to(message, "Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите размутить.")
 
+
+@bot.message_handler(commands=['weather'])
+def get_weather(message):
+    bot.send_message(message.chat.id, 'Введите название города:')
 
 @bot.message_handler(content_types=['text'])
 def weather1i(message):
@@ -730,15 +569,8 @@ def weather1i(message):
               f"\nХорошего дня! или вечера!\n"
               )
 
+
 bad_words=["ссылка", "приглашение"]
-
-
-def check_message(message):
-    for word in bad_words:
-        if word in message.text.lower():
-            return True
-    return False
-
 
 @bot.message_handler(func=lambda message: True)
 def handle_message(message):
@@ -747,6 +579,5 @@ def handle_message(message):
         bot.send_message(message.chat.id, f"Пользователь {message.from_user.username} был удалени❌ или  заблокирован ⛔️за оскорбительные либо матерщинные сообщения")
     else:
         print(message.text)
-
 
 bot.infinity_polling(none_stop=True)
