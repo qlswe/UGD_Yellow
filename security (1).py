@@ -1,19 +1,16 @@
 from telebot import TeleBot
 from pyTelegramBotCAPTCHA import CaptchaManager
-import random
 import time
 from telebot import types
 import requests
 import json
-import logging
 import psutil
 import datetime
-import traceback
-import sys
-import os
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+
 
 bot = TeleBot('TOKEN_BOTFATHER')
-API = 'OPENWEATHER'
+API = 'TOKEN_OPENWEATHER'
 captcha_manager = CaptchaManager(bot.get_me().id)
 
 
@@ -22,30 +19,25 @@ captcha_manager = CaptchaManager(bot.get_me().id)
 #def handle_sticker(msg):
     #bot.delete_message(msg.chat.id, msg.message_id)
     #bot.send_message(msg.chat.id, "⚠️️все стикеры блокируются кодом")
-    #метод по умолчанию выключен если вы хотите вы можете раскомментировать его
-
-@bot.message_handler(commands=['msgfrombot'])
-def msg_from_bot(message):
-    send = bot.send_message(message.chat.id, 'Введите id пользователя')
-    bot.register_next_step_handler(send, msg_from_bot)
 
 
-def msg_from_bot_1(message):
-    global user_id
-    user_id = message.text
-    send = bot.send_message(message.chat.id, 'Введите сообщение')
-    bot.register_next_step_handler(send, msg_from_bot_2)
 
-
-def msg_from_bot_2(message):
-    bot.send_message(user_id, '{}'.format(message.text))
+@bot.message_handler(commands=['report'])
+def handle_report(message):
+    if message.reply_to_message is None:
+        bot.send_message(message.chat.id, 'Пожалуйста, ответьте на сообщение, чтобы отправить репорт.')
+    else:
+        report_message = message.reply_to_message
+        report_message_link = f"https://t.me/{message.chat.username}/{report_message.message_id}"
+        bot.send_message('ID_ADMIN',f'Новый репорт на сообщение пользователя: {report_message_link}\nПричина: {message.text.split(" ", 1)[1]}')
+        bot.send_message(message.chat.id, 'Админы оповещены!')
 
 
 @bot.message_handler(func=lambda message: message.text.lower() == "расстрелять")
 def nas(message):
     tag2 = f"[{message.reply_to_message.from_user.first_name}](tg://user?id={message.reply_to_message.from_user.id})"
     tag1 = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
-    bot.reply_to(message, f'🔫|{tag1} тебя расстрелял(-а) {tag2}', parse_mode='markdown')
+    bot.reply_to(message, f'🔫|{tag1} расстрелял(-а) {tag2}', parse_mode='markdown')
 
 
 # Message handler for new chat members
@@ -89,7 +81,7 @@ def on_timeout(captcha):
 def eda(message):
     tag2 = f"[{message.reply_to_message.from_user.first_name}](tg://user?id={message.reply_to_message.from_user.id})"
     tag1 = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
-    bot.reply_to(message, f'🥄|{tag2} тебя покрмил(-а) с ложочки {tag1} ', parse_mode='markdown')
+    bot.reply_to(message, f'🥄|{tag1} тебя покрмил(-а) с ложочки {tag2} ', parse_mode='markdown')
 
 
 @bot.message_handler(func=lambda message: message.text.lower() == "поцеловать")
@@ -145,7 +137,7 @@ def udit(message):
 def command_text_dela(message):
     tag2 = f"[{message.reply_to_message.from_user.first_name}](tg://user?id={message.reply_to_message.from_user.id})"
     tag1 = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
-    bot.reply_to(message, f'️|{tag1} отсосал(-а) у {tag2} ', parse_mode='markdown')
+    bot.reply_to(message, f'👅️|{tag1} отсосал(-а) у {tag2} ', parse_mode='markdown')
 
 
 @bot.message_handler(func=lambda message: message.text.lower() == "утопить")
@@ -167,6 +159,13 @@ def sos(message):
     tag2 = f"[{message.reply_to_message.from_user.first_name}](tg://user?id={message.reply_to_message.from_user.id})"
     tag1 = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
     bot.reply_to(message, f'🤗|{tag1} обнял(-а) {tag2} ',  parse_mode='markdown')
+
+
+@bot.message_handler(func=lambda message: message.text.lower() == "отлизать")
+def sosif(message):
+    tag2 = f"[{message.reply_to_message.from_user.first_name}](tg://user?id={message.reply_to_message.from_user.id})"
+    tag1 = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
+    bot.reply_to(message, f'👅|{tag1} Отлизал у {tag2}',  parse_mode='markdown')
 
 
 @bot.message_handler(func=lambda message: message.text.lower() == "запереть")
@@ -197,9 +196,17 @@ def sosir(message):
     bot.reply_to(message, f'🤏🏻|{tag1} ущипнул(-а){tag2}',  parse_mode='markdown')
 
 
+@bot.message_handler(func=lambda message: message.text.lower() == "въебать")
+def sossss(message):
+    tag2 = f"[{message.reply_to_message.from_user.first_name}](tg://user?id={message.reply_to_message.from_user.id})"
+    tag1 = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
+    bot.reply_to(message, f'🤕|{tag1}Въебал(-а) со всей силы {tag2}',  parse_mode='markdown')
+
+
+
 @bot.message_handler(func=lambda message: message.text.lower() == "рп команды")
 def rpcom(message):
-    bot.send_message(message.chat.id, "Список доступных РП команд: \n1)Поприветствовать\n2)запереть\n3)обнять\n4)попращаться\n5)попить чай\n6)утопить\n7)убить\n8)расстрелять\n9)отсосать\n10)поприветствовать\n11)утопить\n12)погладить\n13)покормить\n14)похоронить\n15)поцеловать")
+    bot.send_message(message.chat.id, "Список доступных РП команд: \n1)Поприветствовать.\n2)запереть.\n3)обнять.\n4)попращаться.\n5)попить чай.\n6)утопить.\n7)убить.\n8)расстрелять.\n9)отсосать.\n10)поприветствовать.\n11)утопить.\n12)погладить.\n13)покормить.\n14)похоронить.\n15)поцеловать.")
 
 # обработчик команды /stats
 @bot.message_handler(commands=['stats'])
@@ -210,6 +217,7 @@ def send_stats(message):
     bot.send_message(message.chat.id, text)
 
 
+
 @bot.message_handler(commands=['version'])
 def version(message):
    bot.reply_to(message, 'python version: 3.10 Version bot:2.1 changes:[#f7d632a](https://github.com/qlswe/UGD_Yellow2.0/commit/f7d632a07bb6f637992c7ca8da92b0306a5eb7c8)', parse_mode='Markdown')
@@ -217,19 +225,14 @@ def version(message):
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.reply_to(message, "Привет! Я бот для управления чатом. Напиши /help, чтобы начать использование и узнать, что я умею.")
-    keyboard = types.InlineKeyboardMarkup()
-    url_button = types.InlineKeyboardButton(text="Your_text", url="Your_url")
-    keyboard.add(url_button)
-    bot.send_message(message.chat.id, "Your_text", reply_markup=keyboard)
-
-
-@bot.message_handler(commands=['commands'])
-def YaGPT(message):
-    keyboard = types.InlineKeyboardMarkup()
-    url_button = types.InlineKeyboardButton(text="Your text", url="Your_url")
-    keyboard.add(url_button)
-    bot.send_message(message.chat.id, "Your_text", reply_markup=keyboard)
+    bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAEKFNJk4h9cKutDx33CspIddPVgidb4mwACfBIAAvGYMUunL614YVTCCDAE")
+    bot.reply_to(message, "Привет! Я бот для управления чатом. Напиши /help, чтобы начать использование и узнать, что я умею.\n\n[🗞Новостной канал бота.](https://t.me/ugd_dev)\n\n[🔐Канал с логами бота.](https://t.me/ugd_log)", parse_mode='Markdown')
+    chat_id = message.chat.id
+    button_text = "Добавить бота в чат"
+    button_url = f"https://telegram.me/{bot.get_me().username}?startgroup=true"
+    inline_keyboard = InlineKeyboardMarkup()
+    inline_keyboard.add(InlineKeyboardButton(text=button_text, url=button_url))
+    bot.send_message(chat_id,  "Нажмите кнопку, чтобы добавить бота в чат", reply_markup=inline_keyboard)
 
 
 # Функция для получения информации о загрузке CPU и RAM
@@ -254,23 +257,6 @@ def send_status(message):
     sys_status = system_status()
     bot.reply_to(message, f"Состояние системы в данный момент:\n{sys_status}")
 
-
-
-@bot.message_handler(commands=['admin'])
-def chat_stats(message):
-    chat_id = message.chat.id
-    chat_members = bot.get_chat_members_count(chat_id)
-    chat_title = message.chat.title
-    chat_type = message.chat.type
-    chat_admins = bot.get_chat_administrators(chat_id)
-
-    response = f"Статистика чата {chat_title} ({chat_type}):\n\n"
-    response += f"Количество участников: {chat_members}\n"
-
-    admin_list = [admin.user.username for admin in chat_admins]
-    response += f"Администраторы: @{', '.join(admin_list)}"
-
-    bot.send_message(chat_id, response)
 
 # Функция для получения списка пользователей в системе Windows
 def get_users():
@@ -297,10 +283,10 @@ def send_users(message):
 @bot.message_handler(commands=['yandex'])
 def yandex(message):
     keyboard = types.InlineKeyboardMarkup()
-    url_button = types.InlineKeyboardButton(text="Your_text", url="Your_url")
+    url_button = types.InlineKeyboardButton(text="Yandex", url="https://yandex.ru/")
     keyboard.add(url_button)
-    bot.send_photo(message.chat.id, "Your_photo")
-    bot.send_message(message.chat.id, " Your_text", reply_markup=keyboard)
+    bot.send_photo(message.chat.id, "https://cdn-st2.rtr-vesti.ru/vh/pictures/hd/160/365/7.jpg")
+    bot.send_message(message.chat.id, "Иши сколько угодно:_)", reply_markup=keyboard)
 
 
 @bot.message_handler(commands=['off'])
@@ -414,7 +400,7 @@ def P19(message):
 
 
 @bot.message_handler(commands=['P20'])
-def P19(message):
+def P20(message):
     bot.reply_to(message, "\nПока что на этом все.")
 
 @bot.message_handler(commands=['whoami'])
@@ -434,7 +420,7 @@ def whoami(message):
     # Отвечаем на запрос
     bot.send_message(message.chat.id, f'Вы {user_name} ({user_id})')
 
-@bot.message_handler(commands=['ban'])
+@bot.message_handler(commands=['ban', 'бан'])
 def ban_user(message):
     chat_id = message.chat.id
     user_id = message.from_user.id
@@ -476,11 +462,11 @@ def is_user_admin(chat_id, user_id):
 
 @bot.message_handler(commands=['help'])
 def help(message):
-    bot.reply_to(message, "\n1-я команда /kick-удаляет пользователя из группы.\n2-я команда /ban-блокирует и удаляет пользователя из группы.\n3-я команда /unban-обратная функция функции /ban.\n4-я команда Запрещает писать на определенное время(сколько назаначил администратор).\n5-я команда /unmute-обратная команда команде /mute.\n6-я функция показывает погоду в вашем городе по названию либо можно написать команду /weather .\n7-я функция - приветствие новых участников .\n8-я функция - фильтр против мата и плохих слов .\n9-я функция - запрещает отправлять стикеры в телеграмм.\n10-я команда /help-показывает список всех команд.\n11-я команда /start-ну тут я не вижу смысла объяснять.\n12-я команда для перехода в нейросеть Яндекса /YaGPT.\n13-я команда /yandex перейти в поисковик Яндекса.\n14-я команда /rules показывает правила чата(не изменяется).\n15-я команда /version показывает версию бота.\n16-команда 'рп команды' показывает список доступных РП команд.\n17-я команда /stats показывает статистику чата.\n18-я функция капчи.\n А на этом пока все.Будут новые функции. ")
+    bot.reply_to(message, "\nкоманда /kick-удаляет пользователя из группы.\n команда /ban-блокирует и удаляет пользователя из группы.\nкоманда /unban-обратная функция функции /ban.\n команда Запрещает писать на определенное время(сколько назаначил администратор).\nкоманда /unmute-обратная команда команде /mute.\nфункция показывает погоду в вашем городе по названию либо можно написать команду /weather.\nфункция - приветствие новых участников .\nфункция - фильтр против мата и плохих слов .\nфункция - запрещает отправлять стикеры в телеграмм.\nкоманда /help-показывает список всех команд.\nкоманда /start-ну тут я не вижу смысла объяснять.\nкоманда для перехода в нейросеть Яндекса /YaGPT.\nкоманда /yandex перейти в поисковик Яндекса.\nкоманда /rules показывает правила чата(не изменяется).\nкоманда /version показывает версию бота.\nкоманда 'рп команды' показывает список доступных РП команд.\nкоманда /stats показывает статистику чата.\nфункция капчи.\n А на этом пока все.Будут новые функции. ")
     keyboard = types.InlineKeyboardMarkup()
-    url_button = types.InlineKeyboardButton(text="Your_text", url="Your_url")
+    url_button = types.InlineKeyboardButton(text="Жми сюда", url="https://ugdblog.my1.ru")
     keyboard.add(url_button)
-    bot.send_message(message.chat.id, "your_text", reply_markup=keyboard)
+    bot.send_message(message.chat.id, "Посетить мой блог.", reply_markup=keyboard)
 
 @bot.message_handler(commands=['kick'])
 def kick_user(message):
@@ -497,8 +483,8 @@ def kick_user(message):
         bot.reply_to(message, "Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите кикнуть.")
 
 
-@bot.message_handler(commands=['mute'])
-def mute_user(message):
+@bot.message_handler(commands=['mute', 'мут', 'Мут', 'warn'])
+def muter_user(message):
     if message.reply_to_message:
         chat_id = message.chat.id
         user_id = message.reply_to_message.from_user.id
@@ -521,7 +507,7 @@ def mute_user(message):
                     bot.reply_to(message, "Максимальное время - бесконечность день.")
                     return
             bot.restrict_chat_member(chat_id, user_id, until_date=time.time()+duration*60)
-            bot.reply_to(message, f"Пользователь {message.reply_to_message.from_user.username} замучен на {duration} минут.")
+            bot.reply_to(message, f"Пользователь @{message.reply_to_message.from_user.username} замучен 🤐 на {duration} минут за нарушение правил.")
     else:
         bot.reply_to(message, "Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите замутить.")
 
@@ -533,7 +519,7 @@ def unmute_user(message):
         chat_id = message.chat.id
         user_id = message.reply_to_message.from_user.id
         bot.restrict_chat_member(chat_id, user_id, can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True)
-        bot.reply_to(message, f"Пользователь {message.reply_to_message.from_user.username} размучен.")
+        bot.reply_to(message, f"Пользователь @{message.reply_to_message.from_user.username} размучен.Но в следующий раз лучше следить за языком.")
     else:
         bot.reply_to(message, "Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите размутить.")
 
@@ -541,6 +527,7 @@ def unmute_user(message):
 @bot.message_handler(commands=['weather'])
 def get_weather(message):
     bot.send_message(message.chat.id, 'Введите название города:')
+
 
 @bot.message_handler(content_types=['text'])
 def weather1i(message):
@@ -562,15 +549,15 @@ def weather1i(message):
         length_of_the_day = datetime.datetime.fromtimestamp(data["sys"]["sunset"]) - datetime.datetime.fromtimestamp(
             data["sys"]["sunrise"])
 
-        bot.reply_to(message, f"{time.strftime('%B %d, %Y')}\n"
-              f"Погода в городе: {city}\nКоординаты объекта:\nШирота{lat}\nДолгота:{lon}\nТемпература: {temp}C°\nМаксимальная температура:{max_temp}° \nМинимальная температура: {min_temp}°C\nThe state of the sky:{nebo}\n"
-              f"Влажность: {humidity}%\nДавление: {pressure} мм.рт.ст\nВетер: {wind} м/с\n"
-              f"Восход солнца: {sunrise_timestamp}\nЗакат солнца: {sunset_timestamp}\nПродолжительность дня: {length_of_the_day}\n"
-              f"\nХорошего дня! или вечера!\n"
+        bot.reply_to(message, f"{time.strftime('%B %d, %Y')}🗓\n"
+              f"\nПогода в городе: {city}\n\nКоординаты объекта:\nШирота{lat}\nДолгота:{lon}\n\nТемпература: {temp}C°🌡\nМаксимальная температура:{max_temp}C°🥵 \nМинимальная температура: {min_temp}°C🥶\n\nThe state of the sky:{nebo}\n"
+              f"Влажность: {humidity}%💦\nДавление: {pressure} мм.рт.ст😶‍🌫️\nВетер: {wind} м/с💨\n\n"
+              f"Восход солнца: {sunrise_timestamp}🌅\nЗакат солнца: {sunset_timestamp}🌆\nПродолжительность дня: {length_of_the_day}☀️\n\n"
+              f"\nХорошего дня! или вечера!🍀"
               )
 
 
-bad_words=["ссылка", "приглашение"]
+bad_words = ['Плохое_слово']
 
 
 def check_message(message):
@@ -588,4 +575,6 @@ def handle_message(message):
     else:
         print(message.text)
 
+
 bot.infinity_polling(none_stop=True)
+
