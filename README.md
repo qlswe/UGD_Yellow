@@ -1,6 +1,7 @@
-| Version | Supported          |
+| Version | realization        |
 | ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+| 2.2x    | :x:                |
+| 2.2     | :white_check_mark: |
+| 2.1.x   | :white_check_mark: |
+| 1.5     | :white_check_mark: |
+| 1.0     | :white_check_mark: |
