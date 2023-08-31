@@ -220,7 +220,7 @@ def send_stats(message):
 
 @bot.message_handler(commands=['version'])
 def version(message):
-   bot.reply_to(message, 'python version: 3.10 Version bot:2.1 changes:[#f7d632a](https://github.com/qlswe/UGD_Yellow2.0/commit/f7d632a07bb6f637992c7ca8da92b0306a5eb7c8)', parse_mode='Markdown')
+   bot.reply_to(message, 'python version: 3.10 Version bot:2.1 changes:[7891fe7](https://github.com/qlswe/UGD_Yellow/commit/7891fe7336bf1ffd2d52d6169d42ba9eb88d2349)', parse_mode='Markdown')
 
 
 @bot.message_handler(commands=['start'])
