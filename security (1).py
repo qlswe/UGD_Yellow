@@ -1,18 +1,18 @@
 from telebot import TeleBot
 from pyTelegramBotCAPTCHA import CaptchaManager
 import time
-from telebot import types
 import requests
 import json
 import psutil
 import datetime
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from telebot import types
+import sqlite3
 
 
-bot = TeleBot('TOKEN_BOTFATHER')
-API = 'TOKEN_OPENWEATHER'
+bot = TeleBot('')
+API = ''
 captcha_manager = CaptchaManager(bot.get_me().id)
-
 
 
 #@bot.message_handler(func=lambda message: True, content_types=['sticker'])
@@ -22,16 +22,6 @@ captcha_manager = CaptchaManager(bot.get_me().id)
 
 
 
-@bot.message_handler(commands=['report'])
-def handle_report(message):
-    if message.reply_to_message is None:
-        bot.send_message(message.chat.id, 'Пожалуйста, ответьте на сообщение, чтобы отправить репорт.')
-    else:
-        report_message = message.reply_to_message
-        report_message_link = f"https://t.me/{message.chat.username}/{report_message.message_id}"
-        bot.send_message('ID_ADMIN',f'Новый репорт на сообщение пользователя: {report_message_link}\nПричина: {message.text.split(" ", 1)[1]}')
-        bot.send_message(message.chat.id, 'Админы оповещены!')
-
 
 @bot.message_handler(func=lambda message: message.text.lower() == "расстрелять")
 def nas(message):
@@ -40,41 +30,60 @@ def nas(message):
     bot.reply_to(message, f'🔫|{tag1} расстрелял(-а) {tag2}', parse_mode='markdown')
 
 
+@bot.message_handler(commands=['promote'])
+def promote_user(message):
+    chat_id = message.chat.id
+    user_id = message.reply_to_message.from_user.id if message.reply_to_message else message.from_user.id
+    bot.promote_chat_member(chat_id, user_id, can_change_info=True, can_delete_messages=True,
+                            can_invite_users=True, can_restrict_members=True, can_pin_messages=True,
+                            can_promote_members=False)
+    bot.reply_to(message,"Пользователь назначен администратором.")
+
+
+@bot.message_handler(commands=['demote'])
+def demote_user(message):
+    chat_id = message.chat.id
+    user_id = message.reply_to_message.from_user.id if message.reply_to_message else message.from_user.id
+    bot.promote_chat_member(chat_id, user_id, can_change_info=False, can_delete_messages=False,
+                            can_invite_users=False, can_restrict_members=False, can_pin_messages=False,
+                            can_promote_members=False)
+    bot.reply_to(message, "Пользователь больше не является администратором чата.")
+
 # Message handler for new chat members
-@bot.message_handler(content_types=["new_chat_members"])
-def new_member(message):
-  for new_user in message.new_chat_members:
-    captcha_manager.restrict_chat_member(bot, message.chat.id, new_user.id)
-    captcha_manager.send_new_captcha(bot, message.chat, new_user)
+#@bot.message_handler(content_types=["new_chat_members"])
+#def new_member(message):
+  #for new_user in message.new_chat_members:
+    #captcha_manager.restrict_chat_member(bot, message.chat.id, new_user.id)
+    #captcha_manager.send_new_captcha(bot, message.chat, new_user)
 
 # Callback query handler
-@bot.callback_query_handler(func=lambda callback:True)
-def on_callback(callback):
-  captcha_manager.update_captcha(bot, callback)
+#@bot.callback_query_handler(func=lambda callback:True)
+#def on_callback(callback):
+  #captcha_manager.update_captcha(bot, callback)
 
 #Handler for correct solved CAPTCHAs
-@captcha_manager.on_captcha_correct
-def on_correct(captcha):
-  bot.send_message(captcha.chat.id, "Congrats! You solved the CAPTCHA!")
-  captcha_manager.unrestrict_chat_member(bot, captcha.chat.id, captcha.user.id)
-  captcha_manager.delete_captcha(bot, captcha)
+#@captcha_manager.on_captcha_correct
+#def on_correct(captcha):
+  #bot.send_message(captcha.chat.id, "Congrats! You solved the CAPTCHA!")
+  #captcha_manager.unrestrict_chat_member(bot, captcha.chat.id, captcha.user.id)
+  #captcha_manager.delete_captcha(bot, captcha)
 
 # Handler for wrong solved CAPTCHAs
-@captcha_manager.on_captcha_not_correct
-def on_not_correct(captcha):
-  if (captcha.incorrect_digits == 1 and captcha.previous_tries < 2):
-    captcha_manager.refresh_captcha(bot, captcha)
-  else:
-    bot.kick_chat_member(captcha.chat.id, captcha.user.id)
-    bot.send_message(captcha.chat.id, f"{captcha.user.first_name} failed solving the CAPTCHA and was banned!")
-    captcha_manager.delete_captcha(bot, captcha)
+#@captcha_manager.on_captcha_not_correct
+#def on_not_correct(captcha):
+  #if (captcha.incorrect_digits == 1 and captcha.previous_tries < 2):
+    #captcha_manager.refresh_captcha(bot, captcha)
+  #else:
+    #bot.kick_chat_member(captcha.chat.id, captcha.user.id)
+    #bot.send_message(captcha.chat.id, f"{captcha.user.first_name} failed solving the CAPTCHA and was banned!")
+    #captcha_manager.delete_captcha(bot, captcha)
 
 # Handler for timed out CAPTCHAS
-@captcha_manager.on_captcha_timeout
-def on_timeout(captcha):
-  bot.kick_chat_member(captcha.chat.id, captcha.user.id)
-  bot.send_message(captcha.chat.id, f"{captcha.user.first_name} did not solve the CAPTCHA and was banned!")
-  captcha_manager.delete_captcha(bot, captcha)
+#@captcha_manager.on_captcha_timeout
+#def on_timeout(captcha):
+  #bot.kick_chat_member(captcha.chat.id, captcha.user.id)
+  #bot.send_message(captcha.chat.id, f"{captcha.user.first_name} did not solve the CAPTCHA and was banned!")
+  #captcha_manager.delete_captcha(bot, captcha)
 
 
 @bot.message_handler(func=lambda message: message.text.lower() == "покормить")
@@ -203,7 +212,6 @@ def sossss(message):
     bot.reply_to(message, f'🤕|{tag1}Въебал(-а) со всей силы {tag2}',  parse_mode='markdown')
 
 
-
 @bot.message_handler(func=lambda message: message.text.lower() == "рп команды")
 def rpcom(message):
     bot.send_message(message.chat.id, "Список доступных РП команд: \n1)Поприветствовать.\n2)запереть.\n3)обнять.\n4)попращаться.\n5)попить чай.\n6)утопить.\n7)убить.\n8)расстрелять.\n9)отсосать.\n10)поприветствовать.\n11)утопить.\n12)погладить.\n13)покормить.\n14)похоронить.\n15)поцеловать.")
@@ -220,13 +228,73 @@ def send_stats(message):
 
 @bot.message_handler(commands=['version'])
 def version(message):
-   bot.reply_to(message, 'python version: 3.10 Version bot:2.1 changes:[7891fe7](https://github.com/qlswe/UGD_Yellow/commit/7891fe7336bf1ffd2d52d6169d42ba9eb88d2349)', parse_mode='Markdown')
+   bot.reply_to(message, 'python version: 3.10 Version bot:2.2 changes:[#7891fe7](https://github.com/qlswe/UGD_Yellow/commit/7292470fe8ff7ab68bae4912ffc95e080e0c19e5)', parse_mode='Markdown')
+
+
+def get_last_reboot_time():
+    boot_time = datetime.datetime.fromtimestamp(psutil.boot_time())
+    return boot_time.strftime("%Y-%m-%d %H:%M:%S")
+
+# Обработчик команды /uptime
+@bot.message_handler(commands=['uptime'])
+def send_uptime(message):
+    last_reboot_time = get_last_reboot_time()
+    response = f"Время последней перезагрузки сервера: {last_reboot_time}"
+    bot.reply_to(message, response)
+
+
+@bot.message_handler(commands=['help'])
+def help_command(message):
+    help_text = "Этот бот модератора предоставляет следующие команды:\n\n"
+    send_menu(message.chat.id, help_text)
+
+def send_menu(chat_id, text):
+    keyboard = types.InlineKeyboardMarkup(row_width=2)
+
+    kick_button = types.InlineKeyboardButton(text='/kick', callback_data='kick')
+    ban_button = types.InlineKeyboardButton(text='/ban', callback_data='ban')
+    unban_button = types.InlineKeyboardButton(text='/unban', callback_data='unban')
+    warn_button = types.InlineKeyboardButton(text='/warn', callback_data='warn')
+    mute_button = types.InlineKeyboardButton(text='/mute', callback_data='mute')
+    unmute_button = types.InlineKeyboardButton(text='/unmute', callback_data='unmute')
+
+    keyboard.add(kick_button, ban_button)
+    keyboard.add(unban_button, warn_button)
+    keyboard.add(mute_button, unmute_button)
+
+    bot.send_message(chat_id, text, reply_markup=keyboard)
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_query(call):
+    if call.data == "back":
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+        help_command(call.message)
+        return
+
+    descriptions = {
+        'kick': 'Команда /kick используется для исключения пользователей из чата.',
+        'ban': 'Команда /ban используется для блокировки пользователей в чате.',
+        'unban': 'Команда /unban используется для разблокировки пользователей в чате.',
+        'warn': 'Команда /warn используется для предупреждения пользователей в чате.',
+        'mute': 'Команда /mute используется для мута пользователей в чате.',
+        'unmute': 'Команда /unmute используется для размута пользователей в чате.'
+    }
+
+    if call.data in descriptions.keys():
+        markup = types.InlineKeyboardMarkup()
+        markup.add(types.InlineKeyboardButton(text="Назад", callback_data="back"))
+
+        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
+                              text=descriptions[call.data], reply_markup=markup)
+
+
 
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAEKFNJk4h9cKutDx33CspIddPVgidb4mwACfBIAAvGYMUunL614YVTCCDAE")
-    bot.reply_to(message, "Привет! Я бот для управления чатом. Напиши /help, чтобы начать использование и узнать, что я умею.\n\n[🗞Новостной канал бота.](https://t.me/ugd_dev)\n\n[🔐Канал с логами бота.](https://t.me/ugd_log)", parse_mode='Markdown')
+    bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAEKj8JlMo-iXEFWDF1DvtF2mhziHzcpXAACDhgAAg9DqEmwdra0IX0N2zAE")
+    name = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
+    bot.reply_to(message, f'Привет, {name}👋! Я бот для управления чатом. Напиши /help, чтобы начать использование и узнать, что я умею.\n\n[🗞Новостной канал бота.](https://t.me/ugd_dev)\n\n[🔐Канал с логами бота.](https://t.me/ugd_log)', parse_mode='Markdown')
     chat_id = message.chat.id
     button_text = "Добавить бота в чат"
     button_url = f"https://telegram.me/{bot.get_me().username}?startgroup=true"
@@ -246,16 +314,16 @@ def system_status():
 
 
 
-    return f"CPU: {cpu_percent}%\n" \
-           f"RAM: {used_memory} GB / {total_memory} GB ({memory_percent}%)\n" \
-           f"Available RAM: {available_memory} GB"
+    return f"🚨|CPU: {cpu_percent}%\n" \
+           f"🎚|RAM: {used_memory} GB / {total_memory} GB ({memory_percent}%)\n" \
+           f"💾|Available RAM: {available_memory} GB"
 
 
 # Обработка команды /status
 @bot.message_handler(commands=['status'])
 def send_status(message):
     sys_status = system_status()
-    bot.reply_to(message, f"Состояние системы в данный момент:\n{sys_status}")
+    bot.reply_to(message, f"🖥Состояние системы в данный момент:\n{sys_status}")
 
 
 # Функция для получения списка пользователей в системе Windows
@@ -278,24 +346,6 @@ def send_users(message):
         bot.reply_to(message, reply_text)
     else:
         bot.reply_to(message, "В данный момент никто не работает в системе.")
-
-
-@bot.message_handler(commands=['yandex'])
-def yandex(message):
-    keyboard = types.InlineKeyboardMarkup()
-    url_button = types.InlineKeyboardButton(text="Yandex", url="https://yandex.ru/")
-    keyboard.add(url_button)
-    bot.send_photo(message.chat.id, "https://cdn-st2.rtr-vesti.ru/vh/pictures/hd/160/365/7.jpg")
-    bot.send_message(message.chat.id, "Иши сколько угодно:_)", reply_markup=keyboard)
-
-
-@bot.message_handler(commands=['off'])
-def off(message):
-    bot.reply_to(message, "Выключение...")
-    bot.reply_to(message, "Если захотите снова включить сделайте это через консоль сервра.")
-    bot.reply_to(message, "Готово☑️")
-    bot.restrict_chat_member(message.chat.id, message.from_user.id, until_date=time()+86400)
-    exit()
 
 
 @bot.message_handler(commands=['rules'])
@@ -437,7 +487,6 @@ def ban_user(message):
         bot.reply_to(message, "У вас нет прав для этой команды.")
 
 
-# noinspection PyBroadException
 @bot.message_handler(commands=['unban'])
 def unban_user(message):
     chat_id = message.chat.id
@@ -460,14 +509,6 @@ def is_user_admin(chat_id, user_id):
     return chat_member.status == "administrator" or chat_member.status == "creator"
 
 
-@bot.message_handler(commands=['help'])
-def help(message):
-    bot.reply_to(message, "\nкоманда /kick-удаляет пользователя из группы.\n команда /ban-блокирует и удаляет пользователя из группы.\nкоманда /unban-обратная функция функции /ban.\n команда Запрещает писать на определенное время(сколько назаначил администратор).\nкоманда /unmute-обратная команда команде /mute.\nфункция показывает погоду в вашем городе по названию либо можно написать команду /weather.\nфункция - приветствие новых участников .\nфункция - фильтр против мата и плохих слов .\nфункция - запрещает отправлять стикеры в телеграмм.\nкоманда /help-показывает список всех команд.\nкоманда /start-ну тут я не вижу смысла объяснять.\nкоманда для перехода в нейросеть Яндекса /YaGPT.\nкоманда /yandex перейти в поисковик Яндекса.\nкоманда /rules показывает правила чата(не изменяется).\nкоманда /version показывает версию бота.\nкоманда 'рп команды' показывает список доступных РП команд.\nкоманда /stats показывает статистику чата.\nфункция капчи.\n А на этом пока все.Будут новые функции. ")
-    keyboard = types.InlineKeyboardMarkup()
-    url_button = types.InlineKeyboardButton(text="Жми сюда", url="https://ugdblog.my1.ru")
-    keyboard.add(url_button)
-    bot.send_message(message.chat.id, "Посетить мой блог.", reply_markup=keyboard)
-
 @bot.message_handler(commands=['kick'])
 def kick_user(message):
     if message.reply_to_message:
@@ -475,10 +516,10 @@ def kick_user(message):
         user_id = message.reply_to_message.from_user.id
         user_status = bot.get_chat_member(chat_id, user_id).status
         if user_status == 'administrator' or user_status == 'creator':
-            bot.reply_to(message, "Невозможно кикнуть администратора.")
+            bot.reply_to(message, "🛡|Невозможно кикнуть администратора.")
         else:
             bot.kick_chat_member(chat_id, user_id)
-            bot.reply_to(message, f"Пользователь {message.reply_to_message.from_user.username} был кикнут.")
+            bot.reply_to(message, f"🚮|Пользователь {message.reply_to_message.from_user.username} был кикнут.")
     else:
         bot.reply_to(message, "Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите кикнуть.")
 
@@ -507,10 +548,16 @@ def muter_user(message):
                     bot.reply_to(message, "Максимальное время - бесконечность день.")
                     return
             bot.restrict_chat_member(chat_id, user_id, until_date=time.time()+duration*60)
-            bot.reply_to(message, f"Пользователь @{message.reply_to_message.from_user.username} замучен 🤐 на {duration} минут за нарушение правил.")
+            bot.reply_to(message, f"🤐|Пользователь @{message.reply_to_message.from_user.username} замучен на {duration} минут за нарушение правил.")
     else:
-        bot.reply_to(message, "Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите замутить.")
+        bot.reply_to(message, "🛡|Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите замутить.")
 
+
+
+@bot.message_handler(commands=['del'])
+def del_user(message):
+    bot.delete_message(message.chat.id, message.message_id)
+    bot.reply_to(message, f"Сообщение пользователя: @{message.reply_to_message.from_user.username}  было успешно удалено.")
 
 
 @bot.message_handler(commands=['unmute'])
@@ -519,9 +566,9 @@ def unmute_user(message):
         chat_id = message.chat.id
         user_id = message.reply_to_message.from_user.id
         bot.restrict_chat_member(chat_id, user_id, can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True)
-        bot.reply_to(message, f"Пользователь @{message.reply_to_message.from_user.username} размучен.Но в следующий раз лучше следить за языком.")
+        bot.reply_to(message, f"😤|Пользователь @{message.reply_to_message.from_user.username} размучен.Но в следующий раз лучше следить за языком.")
     else:
-        bot.reply_to(message, "Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите размутить.")
+        bot.reply_to(message, "🔂|Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите размутить.")
 
 
 @bot.message_handler(commands=['weather'])
@@ -555,25 +602,6 @@ def weather1i(message):
               f"Восход солнца: {sunrise_timestamp}🌅\nЗакат солнца: {sunset_timestamp}🌆\nПродолжительность дня: {length_of_the_day}☀️\n\n"
               f"\nХорошего дня! или вечера!🍀"
               )
-
-
-bad_words = ['Плохое_слово']
-
-
-def check_message(message):
-    for word in bad_words:
-        if word in message.text.lower():
-            return True
-    return False
-
-
-@bot.message_handler(func=lambda message: True)
-def handle_message(message):
-    if check_message(message):
-        bot.delete_message(message.chat.id, message.message_id)
-        bot.send_message(message.chat.id, f"Пользователь {message.from_user.username} был удалени❌ или  заблокирован ⛔️за оскорбительные либо матерщинные сообщения")
-    else:
-        print(message.text)
 
 
 bot.infinity_polling(none_stop=True)
