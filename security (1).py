@@ -318,6 +318,47 @@ def system_status():
            f"🎚|RAM: {used_memory} GB / {total_memory} GB ({memory_percent}%)\n" \
            f"💾|Available RAM: {available_memory} GB"
 
+# Функция для получения информации о загрузке CPU и RAM
+def system_status():
+    cpu_percent = psutil.cpu_percent(interval=1)
+    memory = psutil.virtual_memory()
+    total_memory = round(memory.total / (1024.0 ** 3), 2)
+    available_memory = round(memory.available / (1024.0 ** 3), 2)
+    used_memory = round(memory.used / (1024.0 ** 3), 2)
+    memory_percent = memory.percent
+
+    return f"CPU: {cpu_percent}%\n" \
+           f"RAM: {used_memory} GB / {total_memory} GB ({memory_percent}%)\n" \
+           f"Available RAM: {available_memory} GB"
+
+
+# Обработка команды /status
+@bot.message_handler(commands=['status'])
+def send_status(message):
+    sys_status = system_status()
+    bot.reply_to(message, f"Текущее состояние системы:\n{sys_status}")
+
+
+# Функция для получения списка пользователей в системе Windows
+def get_users():
+    users = []
+    for user in psutil.users():
+        if user.name not in users:
+            users.append(user.name)
+    return users
+
+
+# Обработка команды /users
+@bot.message_handler(commands=['users'])
+def send_users(message):
+    users = get_users()
+    if users:
+        reply_text = "Пользователи, которые в данный момент работают в системе:\n"
+        for user in users:
+            reply_text += f"{user}\n"
+        bot.reply_to(message, reply_text)
+    else:
+        bot.reply_to(message, "В данный момент никто не работает в системе.")
 
 # Обработка команды /status
 @bot.message_handler(commands=['status'])
